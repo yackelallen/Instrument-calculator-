@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yackel Instrument Toolkit v1.8.3</title>
+<style>
+body{margin:0;font-family:Arial;background:#1f2937;color:#fff}
+.header{background:#111827;padding:18px;text-align:center;border-bottom:3px solid #3b82f6}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:15px}
+.tile,.btn{background:#22c55e;color:#052e16;border:none;padding:14px;border-radius:10px;font-weight:bold;margin:5px 0}
+.btn.secondary{background:#3b82f6;color:white}
+.btn.danger{background:#ef4444;color:white}
+.card{background:#374151;padding:15px;border-radius:12px;margin:10px}
+.section{display:none}
+.active{display:block}
+input,select,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;box-sizing:border-box}
+label{font-weight:bold;color:#d1d5db}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #666;padding:6px;text-align:center}
+.result{background:#111827;padding:10px;border-radius:8px;margin-top:10px;white-space:pre-wrap;color:#93c5fd}
+.savedReport{background:#111827;border:1px solid #4b5563;border-radius:10px;padding:10px;margin:8px 0}
+.footer{text-align:center;padding:15px;color:#9ca3af}
+.small{color:#cbd5e1;font-size:13px}
+.divider{border-top:1px solid #64748b;margin:15px;color:#93c5fd;text-align:center;padding-top:12px;font-weight:bold}
+@media print{.header,.grid,.btn,.footer,#savedReportsBox{display:none!important}.card{background:white;color:black}.result{background:white;color:black}body{background:white;color:black}}
+</style>
+</head>
+<body>
+<div class="header">
+<h2>⚙️ YACKEL INSTRUMENT TOOLKIT</h2>
+<div>Version 1.8.4</div>
+<div>Built by Instrument Techs for Instrument Techs</div>
+</div>
+
+<div id="home" class="active">
+<div class="divider">CALCULATOR TOOLS</div>
+<div class="grid">
+<button class="tile" onclick="showSec('rtd')">🌡️ RTD</button>
+<button class="tile" onclick="showSec('tc')">🔥 Thermocouple</button>
+<button class="tile" onclick="showSec('ma')">📶 4-20 mA</button>
+<button class="tile" onclick="showSec('cal')">📋 Calibrator</button>
+<button class="tile" onclick="showSec('toolbox')">⚡ Toolbox</button>
+</div>
+<div class="divider">CALIBRATION & DOCUMENTATION</div>
+<div class="grid">
+<button class="tile" onclick="showSec('report')">📄 Reports</button>
+</div>
+</div>
+
+<div id="rtd" class="section">
+<div class="card">
+<button class="btn" onclick="home()">Home</button>
+<h3>RTD Calculator</h3>
+
+<label>RTD Type</label>
+<select id="rtdType"><option value="100">Pt100</option><option value="1000">Pt1000</option></select>
+
+<h4>Resistance → Temperature</h4>
+<label>Resistance in Ohms</label>
+<input id="rtdOhms" value="109.73" inputmode="decimal">
+<button class="btn" onclick="calcRTDTemp()">Ohms → Temperature</button>
+<div id="rtdTempOut" class="result"></div>
+
+<h4>Temperature → Resistance</h4>
+<label>Temperature</label>
+<input id="rtdTempIn" value="77" inputmode="decimal">
+<label>Input Unit</label>
+<select id="rtdUnit"><option value="F">°F</option><option value="C">°C</option></select>
+<button class="btn" onclick="calcRTDOhms()">Temperature → Ohms</button>
+<div id="rtdOhmsOut" class="result"></div>
+<p class="small">Uses Callendar-Van Dusen approximation for temperatures above 0°C.</p>
+</div>
+</div>
+
+
+<div id="tc" class="section">
+<div class="card">
+<button class="btn" onclick="home()">Home</button>
+<h3>Thermocouple Calculator</h3>
+
+<label>Thermocouple Type</label>
+<select id="tcType">
+<option value="K">Type K</option>
+<option value="J">Type J</option>
+<option value="T">Type T</option>
+<option value="E">Type E</option>
+<option value="N">Type N</option>
+<option value="R">Type R</option>
+<option value="S">Type S</option>
+<option value="B">Type B</option>
+</select>
+
+<h4>Temperature → mV</h4>
+<label>Temperature</label>
+<input id="tcTempIn" value="212" inputmode="decimal">
+<label>Input Unit</label>
+<select id="tcUnit"><option value="F">°F</option><option value="C">°C</option></select>
+<button class="btn" onclick="calcTCmV()">Temperature → mV</button>
+<div id="tcMvOut" class="result"></div>
+
+<h4>mV → Temperature</h4>
+<label>mV Input</label>
+<input id="tcMvIn" value="4.1" inputmode="decimal">
+<button class="btn" onclick="calcTCTemp()">mV → Temperature</button>
+<div id="tcTempOut" class="result"></div>
+
+<p class="small">Field approximation using average sensitivity values. Good for quick troubleshooting, not certified calibration.</p>
+</div>
+</div>
+
+<div id="ma" class="section">
+<div class="card">
+<button class="btn" onclick="home()">Home</button>
+<h3>4-20 mA Scaling</h3>
+
+<label>LRV</label>
+<input id="maLow" value="0" inputmode="decimal">
+<label>URV</label>
+<input id="maHigh" value="100" inputmode="decimal">
+
+<h4>mA → Engineering Units</h4>
+<label>mA Input</label>
+<input id="maIn" value="12" inputmode="decimal">
+<button class="btn" onclick="calcMaToEU()">mA → EU</button>
+<div id="maToEuOut" class="result"></div>
+
+<h4>Engineering Units → mA</h4>
+<label>Engineering Unit Value</label>
+<input id="euIn" value="50" inputmode="decimal">
+<button class="btn" onclick="calcEuToMa()">EU → mA</button>
+<div id="euToMaOut" class="result"></div>
+</div>
+</div>
+
+<div id="cal" class="section">
+<div class="card">
+<button class="btn" onclick="home()">Home</button>
+<h3>4-20 mA Calibrator</h3>
+<label>Desired Percent</label>
+<input id="calPct" value="50" inputmode="decimal">
+<button class="btn" onclick="calcPctToMa()">Percent → mA</button>
+<div id="pctToMaOut" class="result"></div>
+
+<button class="btn secondary" onclick="fivePoint()">Show 5 Point Check</button>
+<div id="fivePointOut" class="result"></div>
+
+<label>mA Reading</label>
+<input id="calMaIn" value="12" inputmode="decimal">
+<button class="btn" onclick="calcMaToPct()">mA → Percent</button>
+<div id="maToPctOut" class="result"></div>
+</div>
+</div>
+
+<div id="toolbox" class="section">
+<div class="card">
+<button class="btn" onclick="home()">Home</button>
+<h3>Instrument Toolbox</h3>
+
+<h4>Ohm's Law</h4>
+<label>Voltage</label>
+<input id="tbVolts" value="24" inputmode="decimal">
+<label>Resistance Ω</label>
+<input id="tbOhms" value="250" inputmode="decimal">
+<button class="btn" onclick="calcOhmsLaw()">Volts / Ohms → Current</button>
+<div id="ohmsLawOut" class="result"></div>
+
+<h4>250Ω Resistor</h4>
+<label>mA Signal</label>
+<input id="tbMa" value="12" inputmode="decimal">
+<button class="btn" onclick="calc250()">mA through 250Ω → Volts</button>
+<div id="resistorOut" class="result"></div>
+
+<h4>1-5 V Signal</h4>
+<label>Voltage Signal</label>
+<input id="tbSignalV" value="3" inputmode="decimal">
+<button class="btn" onclick="calcOneFive()">1-5 V → mA and Percent</button>
+<div id="oneFiveOut" class="result"></div>
+
+<h4>Loop Load Check</h4>
+<label>Supply Voltage</label>
+<input id="supplyV" value="24" inputmode="decimal">
+<label>Minimum Transmitter Voltage</label>
+<input id="minV" value="12" inputmode="decimal">
+<button class="btn" onclick="calcLoopLoad()">Max Loop Resistance</button>
+<div id="loopLoadOut" class="result"></div>
+</div>
+</div>
+
+<div id="report" class="section">
+<div class="card">
+<button class="btn" onclick="home()">Home</button>
+<h3>Calibration Report Generator</h3>
+
+<input id="tag" placeholder="Tag Number">
+<input id="tech" placeholder="Technician">
+<input id="inst" placeholder="Instrument Type">
+
+<select id="units">
+<option>PSI</option><option>inH2O</option><option>inHg</option>
+<option>kPa</option><option>bar</option><option>°F</option>
+<option>°C</option><option>%</option><option>GPM</option>
+<option>SCFM</option><option>LPM</option><option>Other</option>
+</select>
+
+<input id="lrv" value="0" placeholder="LRV">
+<input id="urv" value="100" placeholder="URV">
+<input id="tol" value="1" placeholder="Tolerance %">
+
+<button class="btn" onclick="buildSheet()">Generate Calibration Sheet</button>
+<button class="btn" onclick="copyFound()">Copy As Found → As Left</button>
+<button class="btn secondary" onclick="saveReport()">Save This Report Locally</button>
+<button class="btn secondary" onclick="newReport()">Start New Report</button>
+
+<div id="sheet"></div>
+
+<textarea id="notes" placeholder="Calibration notes"></textarea>
+
+<button class="btn" onclick="generateReport()">Generate Report</button>
+<button class="btn" onclick="window.print()">Print / Save PDF</button>
+
+<div id="reportOut" class="result"></div>
+</div>
+
+<div class="card" id="savedReportsBox">
+<h3>Saved Local Reports</h3>
+<p class="small">These save only on this phone/browser using local storage. They will not sync to other devices.</p>
+<button class="btn secondary" onclick="renderSavedReports()">Refresh Saved Reports</button>
+<div id="savedReports"></div>
+</div>
+</div>
+
+<div class="footer">Version 1.8.4 • RTD, 4-20 mA, Calibrator, Toolbox restored • Local report saves retained</div>
+
+<script>
+function showSec(id){
+ document.getElementById('home').style.display='none';
+ document.querySelectorAll('.section').forEach(x=>x.style.display='none');
+ document.getElementById(id).style.display='block';
+ if(id==='report'){renderSavedReports();}
+}
+function home(){
+ document.querySelectorAll('.section').forEach(x=>x.style.display='none');
+ document.getElementById('home').style.display='block';
+}
+function n(id){return parseFloat(document.getElementById(id).value);}
+function v(id){return document.getElementById(id).value;}
+function fmt(x){return (!isFinite(x)||isNaN(x))?'Check input':(Math.round(x*10000)/10000).toString();}
+function pts(){return [0,25,50,75,100];}
+function expectedEU(p,lrv,urv){return lrv+((urv-lrv)*(p/100));}
+function expectedMA(p){return 4+(16*(p/100));}
+
+function calcRTDTemp(){
+ var R0=n('rtdType'), R=n('rtdOhms');
+ var A=0.0039083, B=-0.0000005775;
+ var ratio=R/R0;
+ var disc=A*A-4*B*(1-ratio);
+ var C=(-A+Math.sqrt(disc))/(2*B);
+ var F=C*9/5+32;
+ document.getElementById('rtdTempOut').innerText=fmt(C)+' °C / '+fmt(F)+' °F';
+}
+function calcRTDOhms(){
+ var R0=n('rtdType'), input=n('rtdTempIn'), unit=v('rtdUnit');
+ var C=unit==='F'?(input-32)*5/9:input;
+ var F=C*9/5+32;
+ var A=0.0039083, B=-0.0000005775;
+ var R=R0*(1+A*C+B*C*C);
+ document.getElementById('rtdOhmsOut').innerText='Input: '+fmt(input)+' °'+unit+'\\nEquivalent: '+fmt(C)+' °C / '+fmt(F)+' °F\\nResistance: '+fmt(R)+' Ω';
+}
+
+function tcSlope(type){
+ if(type==='E')return 0.061;
+ if(type==='J')return 0.055;
+ if(type==='T')return 0.043;
+ if(type==='K')return 0.041;
+ if(type==='N')return 0.039;
+ if(type==='R')return 0.010;
+ if(type==='S')return 0.010;
+ if(type==='B')return 0.006;
+ return 0.041;
+}
+function calcTCmV(){
+ var type=v('tcType');
+ var input=n('tcTempIn');
+ var unit=v('tcUnit');
+ var C=unit==='F'?(input-32)*5/9:input;
+ var F=C*9/5+32;
+ var mv=C*tcSlope(type);
+ document.getElementById('tcMvOut').innerText='Type '+type+'\\nInput: '+fmt(input)+' °'+unit+'\\nEquivalent: '+fmt(C)+' °C / '+fmt(F)+' °F\\nOutput: '+fmt(mv)+' mV';
+}
+function calcTCTemp(){
+ var type=v('tcType');
+ var mv=n('tcMvIn');
+ var C=mv/tcSlope(type);
+ var F=C*9/5+32;
+ document.getElementById('tcTempOut').innerText='Type '+type+'\\nInput: '+fmt(mv)+' mV\\nApprox Temp: '+fmt(C)+' °C / '+fmt(F)+' °F';
+}
+
+function calcMaToEU(){
+ var ma=n('maIn'), low=n('maLow'), high=n('maHigh');
+ var pct=((ma-4)/16)*100;
+ var eu=low+(pct/100)*(high-low);
+ document.getElementById('maToEuOut').innerText=fmt(eu)+' EU\\n'+fmt(pct)+'%';
+}
+function calcEuToMa(){
+ var eu=n('euIn'), low=n('maLow'), high=n('maHigh');
+ var pct=((eu-low)/(high-low))*100;
+ var ma=4+(pct/100)*16;
+ document.getElementById('euToMaOut').innerText=fmt(ma)+' mA\\n'+fmt(pct)+'%';
+}
+function calcPctToMa(){
+ var pct=n('calPct');
+ var ma=4+(pct/100)*16;
+ document.getElementById('pctToMaOut').innerText=fmt(ma)+' mA';
+}
+function calcMaToPct(){
+ var ma=n('calMaIn');
+ var pct=((ma-4)/16)*100;
+ document.getElementById('maToPctOut').innerText=fmt(pct)+'%';
+}
+function fivePoint(){
+ var text='';
+ pts().forEach(p=>{text+=p+'% = '+fmt(expectedMA(p))+' mA\\n';});
+ document.getElementById('fivePointOut').innerText=text;
+}
+function calcOhmsLaw(){
+ var A=n('tbVolts')/n('tbOhms');
+ document.getElementById('ohmsLawOut').innerText=fmt(A)+' A\\n'+fmt(A*1000)+' mA';
+}
+function calc250(){
+ var volts=(n('tbMa')/1000)*250;
+ document.getElementById('resistorOut').innerText=fmt(volts)+' V';
+}
+function calcOneFive(){
+ var sig=n('tbSignalV');
+ var pct=((sig-1)/4)*100;
+ var ma=4+(pct/100)*16;
+ document.getElementById('oneFiveOut').innerText=fmt(pct)+'%\\n'+fmt(ma)+' mA';
+}
+function calcLoopLoad(){
+ var maxR=(n('supplyV')-n('minV'))/0.02;
+ document.getElementById('loopLoadOut').innerText=fmt(maxR)+' Ω max loop resistance at 20 mA';
+}
+
+function buildSheet(data){
+ let lrv=parseFloat(document.getElementById('lrv').value);
+ let urv=parseFloat(document.getElementById('urv').value);
+ let unit=document.getElementById('units').value;
+ let h='<table><tr><th>%</th><th>Expected '+unit+'</th><th>Expected mA</th><th>As Found mA</th><th>As Left mA</th></tr>';
+ pts().forEach(p=>{
+  let eu=expectedEU(p,lrv,urv);
+  let ma=expectedMA(p);
+  let af=data&&data.af?data.af[p]||'':'';
+  let al=data&&data.al?data.al[p]||'':'';
+  h+=`<tr><td>${p}%</td><td>${eu.toFixed(3)}</td><td>${ma.toFixed(3)}</td>
+  <td><input id="af${p}" value="${af}"></td><td><input id="al${p}" value="${al}"></td></tr>`;
+ });
+ h+='</table>';
+ document.getElementById('sheet').innerHTML=h;
+}
+function copyFound(){
+ pts().forEach(p=>{
+  let a=document.getElementById('af'+p);
+  let b=document.getElementById('al'+p);
+  if(a&&b)b.value=a.value;
+ });
+}
+function collectReport(){
+ let data={
+  id: Date.now().toString(),
+  savedAt: new Date().toLocaleString(),
+  tag: tag.value,
+  tech: tech.value,
+  inst: inst.value,
+  units: units.value,
+  lrv: lrv.value,
+  urv: urv.value,
+  tol: tol.value,
+  notes: notes.value,
+  af:{}, al:{}
+ };
+ pts().forEach(p=>{
+  let afEl=document.getElementById('af'+p);
+  let alEl=document.getElementById('al'+p);
+  data.af[p]=afEl?afEl.value:'';
+  data.al[p]=alEl?alEl.value:'';
+ });
+ return data;
+}
+function fillReport(data){
+ tag.value=data.tag||'';
+ tech.value=data.tech||'';
+ inst.value=data.inst||'';
+ units.value=data.units||'PSI';
+ lrv.value=data.lrv||'0';
+ urv.value=data.urv||'100';
+ tol.value=data.tol||'1';
+ notes.value=data.notes||'';
+ buildSheet(data);
+ generateReport();
+}
+function getSaved(){
+ try{return JSON.parse(localStorage.getItem('yit_reports')||'[]');}
+ catch(e){return [];}
+}
+function setSaved(list){localStorage.setItem('yit_reports',JSON.stringify(list));}
+function saveReport(){
+ buildSheet();
+ let data=collectReport();
+ let list=getSaved();
+ list.unshift(data);
+ setSaved(list);
+ renderSavedReports();
+ alert('Report saved locally.');
+}
+function renderSavedReports(){
+ let list=getSaved();
+ let box=document.getElementById('savedReports');
+ if(!box)return;
+ if(list.length===0){box.innerHTML='<p class="small">No saved reports yet.</p>';return;}
+ let h='';
+ list.forEach(r=>{
+  h+=`<div class="savedReport">
+  <b>${r.tag||'No Tag'}</b><br>
+  ${r.inst||''}<br>
+  Saved: ${r.savedAt}<br>
+  Range: ${r.lrv} to ${r.urv} ${r.units}<br>
+  <button class="btn secondary" onclick="loadReport('${r.id}')">Load</button>
+  <button class="btn danger" onclick="deleteReport('${r.id}')">Delete</button>
+  </div>`;
+ });
+ box.innerHTML=h;
+}
+function loadReport(id){
+ let list=getSaved();
+ let r=list.find(x=>x.id===id);
+ if(r){fillReport(r);}
+}
+function deleteReport(id){
+ if(!confirm('Delete this saved report?'))return;
+ let list=getSaved().filter(x=>x.id!==id);
+ setSaved(list);
+ renderSavedReports();
+}
+function newReport(){
+ if(!confirm('Start a new blank report? Save current report first if needed.'))return;
+ tag.value='';tech.value='';inst.value='';units.value='PSI';lrv.value='0';urv.value='100';tol.value='1';notes.value='';
+ buildSheet();
+ reportOut.innerText='';
+}
+function generateReport(){
+ let data=collectReport();
+ let txt='Tag: '+data.tag+'\\nTechnician: '+data.tech+'\\nInstrument: '+data.inst+
+ '\\nRange: '+data.lrv+' to '+data.urv+' '+data.units+'\\nGenerated: '+new Date().toLocaleString()+'\\n\\n';
+ txt+='Calibration Points:\\n';
+ pts().forEach(p=>{
+  txt+=p+'% | Exp '+expectedEU(p,parseFloat(data.lrv),parseFloat(data.urv)).toFixed(3)+' '+data.units+
+  ' | Exp '+expectedMA(p).toFixed(3)+' mA | AF '+(data.af[p]||'')+' mA | AL '+(data.al[p]||'')+' mA\\n';
+ });
+ txt+='\\nNotes:\\n'+data.notes;
+ document.getElementById('reportOut').innerText=txt;
+}
+window.onload=function(){buildSheet();renderSavedReports();calcRTDTemp();calcRTDOhms();calcTCmV();calcTCTemp();calcMaToEU();calcEuToMa();calcPctToMa();calcMaToPct();fivePoint();calcOhmsLaw();calc250();calcOneFive();calcLoopLoad();}
+</script>
+</body></html>
