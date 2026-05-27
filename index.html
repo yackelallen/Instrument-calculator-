@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yackel Instrument Toolkit v1.8.6</title>
+<style>
+body{margin:0;font-family:Arial;background:#1f2937;color:#fff}
+.header{background:#111827;padding:18px;text-align:center;border-bottom:3px solid #3b82f6}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:15px}
+.tile,.btn{background:#22c55e;color:#052e16;border:none;padding:14px;border-radius:10px;font-weight:bold;margin:5px 0}
+.btn.secondary{background:#3b82f6;color:white}
+.card{background:#374151;padding:15px;border-radius:12px;margin:10px}
+.section{display:none}
+.active{display:block}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #666;padding:8px;text-align:center}
+.footer{text-align:center;padding:15px;color:#9ca3af}
+.divider{border-top:1px solid #64748b;margin:15px;color:#93c5fd;text-align:center;padding-top:12px;font-weight:bold}
+.small{color:#cbd5e1;font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h2>⚙️ YACKEL INSTRUMENT TOOLKIT</h2>
+<div>Version 1.8.6</div>
+<div>Built by Instrument Techs for Instrument Techs</div>
+</div>
+
+<div id="home" class="active">
+
+<div class="divider">CALCULATOR TOOLS</div>
+<div class="grid">
+<button class="tile">🌡️ RTD</button>
+<button class="tile">🔥 Thermocouple</button>
+<button class="tile">📶 4-20 mA</button>
+<button class="tile">📋 Calibrator</button>
+</div>
+
+<div class="divider">CALIBRATION & DOCUMENTATION</div>
+<div class="grid">
+<button class="tile">📄 Reports</button>
+<button class="tile">🛠️ Valve Stroke</button>
+</div>
+
+<div class="divider">REFERENCE LIBRARY</div>
+<div class="grid">
+<button class="tile" onclick="showLib()">📚 Thermocouple Reference</button>
+</div>
+
+</div>
+
+<div id="library" class="section">
+<div class="card">
+<button class="btn secondary" onclick="goHome()">Home</button>
+
+<h2>🔥 Thermocouple Reference Library</h2>
+
+<p class="small">
+⚠️ ANSI Standard Reminder: RED is always NEGATIVE on thermocouples.
+</p>
+
+<h3>Type K</h3>
+<table>
+<tr><th>Lead</th><th>Color</th></tr>
+<tr><td>Positive (+)</td><td>Yellow</td></tr>
+<tr><td>Negative (-)</td><td>Red</td></tr>
+<tr><td>Range °C</td><td>-200°C to 1260°C</td></tr>
+<tr><td>Range °F</td><td>-328°F to 2300°F</td></tr>
+</table>
+
+<h3>Type J</h3>
+<table>
+<tr><th>Lead</th><th>Color</th></tr>
+<tr><td>Positive (+)</td><td>White</td></tr>
+<tr><td>Negative (-)</td><td>Red</td></tr>
+<tr><td>Range °C</td><td>-210°C to 760°C</td></tr>
+<tr><td>Range °F</td><td>-346°F to 1400°F</td></tr>
+</table>
+
+<h3>Type T</h3>
+<table>
+<tr><th>Lead</th><th>Color</th></tr>
+<tr><td>Positive (+)</td><td>Blue</td></tr>
+<tr><td>Negative (-)</td><td>Red</td></tr>
+<tr><td>Range °C</td><td>-200°C to 370°C</td></tr>
+<tr><td>Range °F</td><td>-328°F to 700°F</td></tr>
+</table>
+
+<h3>Type E</h3>
+<table>
+<tr><th>Lead</th><th>Color</th></tr>
+<tr><td>Positive (+)</td><td>Purple</td></tr>
+<tr><td>Negative (-)</td><td>Red</td></tr>
+<tr><td>Range °C</td><td>-200°C to 1000°C</td></tr>
+<tr><td>Range °F</td><td>-328°F to 1832°F</td></tr>
+</table>
+
+<h3>Type N</h3>
+<table>
+<tr><th>Lead</th><th>Color</th></tr>
+<tr><td>Positive (+)</td><td>Orange</td></tr>
+<tr><td>Negative (-)</td><td>Red</td></tr>
+<tr><td>Range °C</td><td>-200°C to 1300°C</td></tr>
+<tr><td>Range °F</td><td>-328°F to 2372°F</td></tr>
+</table>
+
+<h3>Type R</h3>
+<table>
+<tr><th>Lead</th><th>Color</th></tr>
+<tr><td>Positive (+)</td><td>Black</td></tr>
+<tr><td>Negative (-)</td><td>Red</td></tr>
+<tr><td>Range °C</td><td>0°C to 1600°C</td></tr>
+<tr><td>Range °F</td><td>32°F to 2912°F</td></tr>
+</table>
+
+<h3>Type S</h3>
+<table>
+<tr><th>Lead</th><th>Color</th></tr>
+<tr><td>Positive (+)</td><td>Black</td></tr>
+<tr><td>Negative (-)</td><td>Red</td></tr>
+<tr><td>Range °C</td><td>0°C to 1600°C</td></tr>
+<tr><td>Range °F</td><td>32°F to 2912°F</td></tr>
+</table>
+
+<h3>Type B</h3>
+<table>
+<tr><th>Lead</th><th>Color</th></tr>
+<tr><td>Positive (+)</td><td>Gray</td></tr>
+<tr><td>Negative (-)</td><td>Red</td></tr>
+<tr><td>Range °C</td><td>600°C to 1700°C</td></tr>
+<tr><td>Range °F</td><td>1112°F to 3092°F</td></tr>
+</table>
+
+</div>
+</div>
+
+<div class="footer">
+Version 1.8.6 • Reference Library Added
+</div>
+
+<script>
+function showLib(){
+ document.getElementById('home').style.display='none';
+ document.getElementById('library').style.display='block';
+}
+function goHome(){
+ document.getElementById('library').style.display='none';
+ document.getElementById('home').style.display='block';
+}
+</script>
+
+</body>
+</html>
