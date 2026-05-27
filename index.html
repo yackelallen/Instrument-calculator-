@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yackel Instrument Toolkit v1.8.1</title>
+<style>
+body{margin:0;font-family:Arial;background:#1f2937;color:#fff}
+.header{background:#111827;padding:18px;text-align:center;border-bottom:3px solid #3b82f6}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:15px}
+.tile,.btn{background:#22c55e;color:#052e16;border:none;padding:14px;border-radius:10px;font-weight:bold}
+.card{background:#374151;padding:15px;border-radius:12px;margin:10px}
+.section{display:none}
+.active{display:block}
+input,select,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #666;padding:6px;text-align:center}
+.result{background:#111827;padding:10px;border-radius:8px;margin-top:10px;white-space:pre-wrap}
+.footer{text-align:center;padding:15px;color:#9ca3af}
+</style>
+</head>
+<body>
+<div class="header">
+<h2>⚙️ YACKEL INSTRUMENT TOOLKIT</h2>
+<div>Version 1.8.1</div>
+<div>Built by Instrument Techs for Instrument Techs</div>
+</div>
+
+<div id="home" class="active">
+<div class="grid">
+<button class="tile" onclick="showSec('rtd')">🌡️ RTD</button>
+<button class="tile" onclick="showSec('tc')">🔥 Thermocouple</button>
+<button class="tile" onclick="showSec('ma')">📶 4-20 mA</button>
+<button class="tile" onclick="showSec('cal')">📋 Calibrator</button>
+<button class="tile" onclick="showSec('report')">📄 Reports</button>
+<button class="tile" onclick="showSec('toolbox')">⚡ Toolbox</button>
+</div>
+</div>
+
+<div id="report" class="section">
+<div class="card">
+<button class="btn" onclick="home()">Home</button>
+<h3>Calibration Report Generator</h3>
+
+<input id="tag" placeholder="Tag Number">
+<input id="tech" placeholder="Technician">
+<input id="inst" placeholder="Instrument Type">
+
+<select id="units">
+<option>PSI</option><option>inH2O</option><option>inHg</option>
+<option>kPa</option><option>bar</option><option>°F</option>
+<option>°C</option><option>%</option><option>GPM</option>
+<option>SCFM</option><option>LPM</option><option>Other</option>
+</select>
+
+<input id="lrv" value="0" placeholder="LRV">
+<input id="urv" value="100" placeholder="URV">
+<input id="tol" value="1" placeholder="Tolerance %">
+
+<button class="btn" onclick="buildSheet()">Generate Calibration Sheet</button>
+<button class="btn" onclick="copyFound()">Copy As Found → As Left</button>
+
+<div id="sheet"></div>
+
+<textarea id="notes" placeholder="Calibration notes"></textarea>
+
+<button class="btn" onclick="generateReport()">Generate Report</button>
+<button class="btn" onclick="window.print()">Print / Save PDF</button>
+
+<div id="reportOut" class="result"></div>
+</div>
+</div>
+
+<div id="rtd" class="section"><div class="card"><button class="btn" onclick="home()">Home</button><h3>RTD</h3><p>RTD tools placeholder.</p></div></div>
+<div id="tc" class="section"><div class="card"><button class="btn" onclick="home()">Home</button><h3>Thermocouple</h3><p>TC tools placeholder.</p></div></div>
+<div id="ma" class="section"><div class="card"><button class="btn" onclick="home()">Home</button><h3>4-20 mA</h3><p>Scaling tools placeholder.</p></div></div>
+<div id="cal" class="section"><div class="card"><button class="btn" onclick="home()">Home</button><h3>Calibrator</h3><p>Calibrator tools placeholder.</p></div></div>
+<div id="toolbox" class="section"><div class="card"><button class="btn" onclick="home()">Home</button><h3>Toolbox</h3><p>Toolbox placeholder.</p></div></div>
+
+<div class="footer">Version 1.8.1 • Yackel Instrument Toolkit</div>
+
+<script>
+function showSec(id){
+ document.getElementById('home').style.display='none';
+ document.querySelectorAll('.section').forEach(x=>x.style.display='none');
+ document.getElementById(id).style.display='block';
+}
+function home(){
+ document.querySelectorAll('.section').forEach(x=>x.style.display='none');
+ document.getElementById('home').style.display='block';
+}
+function buildSheet(){
+ let lrv=parseFloat(document.getElementById('lrv').value);
+ let urv=parseFloat(document.getElementById('urv').value);
+ let unit=document.getElementById('units').value;
+ let pts=[0,25,50,75,100];
+ let h='<table><tr><th>%</th><th>Expected '+unit+'</th><th>Expected mA</th><th>As Found mA</th><th>As Left mA</th></tr>';
+ pts.forEach(p=>{
+  let eu=lrv+((urv-lrv)*(p/100));
+  let ma=4+(16*(p/100));
+  h+=`<tr><td>${p}%</td><td>${eu.toFixed(3)}</td><td>${ma.toFixed(3)}</td>
+  <td><input id="af${p}"></td><td><input id="al${p}"></td></tr>`;
+ });
+ h+='</table>';
+ document.getElementById('sheet').innerHTML=h;
+}
+function copyFound(){
+ [0,25,50,75,100].forEach(p=>{
+  let a=document.getElementById('af'+p);
+  let b=document.getElementById('al'+p);
+  if(a&&b)b.value=a.value;
+ });
+}
+function generateReport(){
+ let txt='Tag: '+tag.value+'\nTechnician: '+tech.value+'\nInstrument: '+inst.value+
+ '\nRange: '+lrv.value+' to '+urv.value+' '+units.value+'\n\nNotes:\n'+notes.value;
+ document.getElementById('reportOut').innerText=txt;
+}
+</script>
+</body></html>
