@@ -1,29 +1,33 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Yackel Instrument Toolkit v1.8.1</title>
+<title>Yackel Instrument Toolkit v1.8.2</title>
 <style>
 body{margin:0;font-family:Arial;background:#1f2937;color:#fff}
 .header{background:#111827;padding:18px;text-align:center;border-bottom:3px solid #3b82f6}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:15px}
-.tile,.btn{background:#22c55e;color:#052e16;border:none;padding:14px;border-radius:10px;font-weight:bold}
+.tile,.btn{background:#22c55e;color:#052e16;border:none;padding:14px;border-radius:10px;font-weight:bold;margin:5px 0}
+.btn.secondary{background:#3b82f6;color:white}
+.btn.danger{background:#ef4444;color:white}
 .card{background:#374151;padding:15px;border-radius:12px;margin:10px}
 .section{display:none}
 .active{display:block}
-input,select,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px}
-table{width:100%;border-collapse:collapse}
+input,select,textarea{width:100%;padding:10px;margin:5px 0;border-radius:8px;box-sizing:border-box}
+table{width:100%;border-collapse:collapse;margin-top:10px}
 th,td{border:1px solid #666;padding:6px;text-align:center}
 .result{background:#111827;padding:10px;border-radius:8px;margin-top:10px;white-space:pre-wrap}
+.savedReport{background:#111827;border:1px solid #4b5563;border-radius:10px;padding:10px;margin:8px 0}
 .footer{text-align:center;padding:15px;color:#9ca3af}
+.small{color:#cbd5e1;font-size:13px}
+@media print{.header,.grid,.btn,.footer,#savedReportsBox{display:none!important}.card{background:white;color:black}.result{background:white;color:black}body{background:white;color:black}}
 </style>
 </head>
 <body>
 <div class="header">
 <h2>⚙️ YACKEL INSTRUMENT TOOLKIT</h2>
-<div>Version 1.8.1</div>
+<div>Version 1.8.2</div>
 <div>Built by Instrument Techs for Instrument Techs</div>
 </div>
 
@@ -60,6 +64,8 @@ th,td{border:1px solid #666;padding:6px;text-align:center}
 
 <button class="btn" onclick="buildSheet()">Generate Calibration Sheet</button>
 <button class="btn" onclick="copyFound()">Copy As Found → As Left</button>
+<button class="btn secondary" onclick="saveReport()">Save This Report Locally</button>
+<button class="btn secondary" onclick="newReport()">Start New Report</button>
 
 <div id="sheet"></div>
 
@@ -70,6 +76,13 @@ th,td{border:1px solid #666;padding:6px;text-align:center}
 
 <div id="reportOut" class="result"></div>
 </div>
+
+<div class="card" id="savedReportsBox">
+<h3>Saved Local Reports</h3>
+<p class="small">These save only on this phone/browser using local storage. They will not sync to other devices.</p>
+<button class="btn secondary" onclick="renderSavedReports()">Refresh Saved Reports</button>
+<div id="savedReports"></div>
+</div>
 </div>
 
 <div id="rtd" class="section"><div class="card"><button class="btn" onclick="home()">Home</button><h3>RTD</h3><p>RTD tools placeholder.</p></div></div>
@@ -78,44 +91,140 @@ th,td{border:1px solid #666;padding:6px;text-align:center}
 <div id="cal" class="section"><div class="card"><button class="btn" onclick="home()">Home</button><h3>Calibrator</h3><p>Calibrator tools placeholder.</p></div></div>
 <div id="toolbox" class="section"><div class="card"><button class="btn" onclick="home()">Home</button><h3>Toolbox</h3><p>Toolbox placeholder.</p></div></div>
 
-<div class="footer">Version 1.8.1 • Yackel Instrument Toolkit</div>
+<div class="footer">Version 1.8.2 • Multiple local report saves added</div>
 
 <script>
 function showSec(id){
  document.getElementById('home').style.display='none';
  document.querySelectorAll('.section').forEach(x=>x.style.display='none');
  document.getElementById(id).style.display='block';
+ if(id==='report'){renderSavedReports();}
 }
 function home(){
  document.querySelectorAll('.section').forEach(x=>x.style.display='none');
  document.getElementById('home').style.display='block';
 }
-function buildSheet(){
+function pts(){return [0,25,50,75,100];}
+function expectedEU(p,lrv,urv){return lrv+((urv-lrv)*(p/100));}
+function expectedMA(p){return 4+(16*(p/100));}
+function buildSheet(data){
  let lrv=parseFloat(document.getElementById('lrv').value);
  let urv=parseFloat(document.getElementById('urv').value);
  let unit=document.getElementById('units').value;
- let pts=[0,25,50,75,100];
  let h='<table><tr><th>%</th><th>Expected '+unit+'</th><th>Expected mA</th><th>As Found mA</th><th>As Left mA</th></tr>';
- pts.forEach(p=>{
-  let eu=lrv+((urv-lrv)*(p/100));
-  let ma=4+(16*(p/100));
+ pts().forEach(p=>{
+  let eu=expectedEU(p,lrv,urv);
+  let ma=expectedMA(p);
+  let af=data&&data.af?data.af[p]||'':'';
+  let al=data&&data.al?data.al[p]||'':'';
   h+=`<tr><td>${p}%</td><td>${eu.toFixed(3)}</td><td>${ma.toFixed(3)}</td>
-  <td><input id="af${p}"></td><td><input id="al${p}"></td></tr>`;
+  <td><input id="af${p}" value="${af}"></td><td><input id="al${p}" value="${al}"></td></tr>`;
  });
  h+='</table>';
  document.getElementById('sheet').innerHTML=h;
 }
 function copyFound(){
- [0,25,50,75,100].forEach(p=>{
+ pts().forEach(p=>{
   let a=document.getElementById('af'+p);
   let b=document.getElementById('al'+p);
   if(a&&b)b.value=a.value;
  });
 }
+function collectReport(){
+ let data={
+  id: Date.now().toString(),
+  savedAt: new Date().toLocaleString(),
+  tag: tag.value,
+  tech: tech.value,
+  inst: inst.value,
+  units: units.value,
+  lrv: lrv.value,
+  urv: urv.value,
+  tol: tol.value,
+  notes: notes.value,
+  af:{}, al:{}
+ };
+ pts().forEach(p=>{
+  let afEl=document.getElementById('af'+p);
+  let alEl=document.getElementById('al'+p);
+  data.af[p]=afEl?afEl.value:'';
+  data.al[p]=alEl?alEl.value:'';
+ });
+ return data;
+}
+function fillReport(data){
+ tag.value=data.tag||'';
+ tech.value=data.tech||'';
+ inst.value=data.inst||'';
+ units.value=data.units||'PSI';
+ lrv.value=data.lrv||'0';
+ urv.value=data.urv||'100';
+ tol.value=data.tol||'1';
+ notes.value=data.notes||'';
+ buildSheet(data);
+ generateReport();
+}
+function getSaved(){
+ try{return JSON.parse(localStorage.getItem('yit_reports')||'[]');}
+ catch(e){return [];}
+}
+function setSaved(list){localStorage.setItem('yit_reports',JSON.stringify(list));}
+function saveReport(){
+ buildSheet();
+ let data=collectReport();
+ let list=getSaved();
+ list.unshift(data);
+ setSaved(list);
+ renderSavedReports();
+ alert('Report saved locally.');
+}
+function renderSavedReports(){
+ let list=getSaved();
+ let box=document.getElementById('savedReports');
+ if(!box)return;
+ if(list.length===0){box.innerHTML='<p class="small">No saved reports yet.</p>';return;}
+ let h='';
+ list.forEach(r=>{
+  h+=`<div class="savedReport">
+  <b>${r.tag||'No Tag'}</b><br>
+  ${r.inst||''}<br>
+  Saved: ${r.savedAt}<br>
+  Range: ${r.lrv} to ${r.urv} ${r.units}<br>
+  <button class="btn secondary" onclick="loadReport('${r.id}')">Load</button>
+  <button class="btn danger" onclick="deleteReport('${r.id}')">Delete</button>
+  </div>`;
+ });
+ box.innerHTML=h;
+}
+function loadReport(id){
+ let list=getSaved();
+ let r=list.find(x=>x.id===id);
+ if(r){fillReport(r);}
+}
+function deleteReport(id){
+ if(!confirm('Delete this saved report?'))return;
+ let list=getSaved().filter(x=>x.id!==id);
+ setSaved(list);
+ renderSavedReports();
+}
+function newReport(){
+ if(!confirm('Start a new blank report? Save current report first if needed.'))return;
+ tag.value='';tech.value='';inst.value='';units.value='PSI';lrv.value='0';urv.value='100';tol.value='1';notes.value='';
+ buildSheet();
+ reportOut.innerText='';
+}
 function generateReport(){
- let txt='Tag: '+tag.value+'\nTechnician: '+tech.value+'\nInstrument: '+inst.value+
- '\nRange: '+lrv.value+' to '+urv.value+' '+units.value+'\n\nNotes:\n'+notes.value;
+ let data=collectReport();
+ let txt='Tag: '+data.tag+'\\nTechnician: '+data.tech+'\\nInstrument: '+data.inst+
+ '\\nRange: '+data.lrv+' to '+data.urv+' '+data.units+'\\nSaved/Generated: '+new Date().toLocaleString()+'\\n\\n';
+ txt+='Calibration Points:\\n';
+ pts().forEach(p=>{
+  txt+=p+'% | Exp '+expectedEU(p,parseFloat(data.lrv),parseFloat(data.urv)).toFixed(3)+' '+data.units+
+  ' | Exp '+expectedMA(p).toFixed(3)+' mA | AF '+(data.af[p]||'')+' mA | AL '+(data.al[p]||'')+' mA\\n';
+ });
+ txt+='\\nNotes:\\n'+data.notes;
  document.getElementById('reportOut').innerText=txt;
 }
+window.onload=function(){buildSheet();renderSavedReports();}
 </script>
 </body></html>
