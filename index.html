@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yackel Instrument Calculator</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#0f172a;color:#e5e7eb;padding:14px}
+.app{max-width:900px;margin:0 auto}
+.hero,.card{background:#111827;border:1px solid #334155;border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+h1{margin:0 0 8px;font-size:28px}
+h2{margin:0 0 12px;font-size:21px}
+p{color:#94a3b8}
+.tabs{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+@media(min-width:760px){.tabs{grid-template-columns:repeat(3,1fr)}}
+.tabbtn{background:#020617;color:#e5e7eb;border:1px solid #334155}
+.tabbtn.active{background:#22c55e;color:#052e16;border-color:#22c55e}
+label{font-weight:700;margin-top:9px;display:block;color:#cbd5e1}
+input,select,button{width:100%;font-size:18px;padding:14px;margin:6px 0;border-radius:14px;border:1px solid #475569}
+input,select{background:#020617;color:#e5e7eb}
+button{background:#22c55e;color:#052e16;font-weight:900;cursor:pointer}
+.result{background:#020617;border:1px solid #334155;border-radius:16px;padding:16px;margin-top:10px;font-size:22px;font-weight:900;min-height:58px;color:#38bdf8;white-space:pre-line}
+.small{font-size:13px;color:#94a3b8}
+.footer{text-align:center;color:#64748b;font-size:13px;padding:18px}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="hero">
+<h1>Yackel Instrument Calculator</h1>
+<p>Field calculator for RTD, thermocouples, 4-20 mA, calibration, pressure, flow, level, and instrument toolbox work.</p>
+</div>
+
+<div class="tabs">
+<button class="tabbtn active" onclick="openTab('rtd',this)">RTD</button>
+<button class="tabbtn" onclick="openTab('tc',this)">TC</button>
+<button class="tabbtn" onclick="openTab('ma',this)">4-20</button>
+<button class="tabbtn" onclick="openTab('cal',this)">Calibrator</button>
+<button class="tabbtn" onclick="openTab('toolbox',this)">Toolbox</button>
+<button class="tabbtn" onclick="openTab('temp',this)">Temp</button>
+<button class="tabbtn" onclick="openTab('pressure',this)">Pressure</button>
+<button class="tabbtn" onclick="openTab('flow',this)">Flow</button>
+<button class="tabbtn" onclick="openTab('level',this)">Level</button>
+</div>
+
+<div id="rtd" class="tab card">
+<h2>RTD Calculator</h2>
+<label>RTD Type</label>
+<select id="rtdType"><option value="100">Pt100</option><option value="1000">Pt1000</option></select>
+<label>Resistance to Temperature</label>
+<input id="ohms" type="number" inputmode="decimal" value="109.73" placeholder="Ohms">
+<button onclick="calcRTD()">Ohms → Temperature</button>
+<div id="rtdOut" class="result">-</div>
+<label>Temperature to Resistance</label>
+<input id="rtdTemp" type="number" inputmode="decimal" value="25" placeholder="Temperature in C">
+<button onclick="calcRTDReverse()">Temperature °C → Ohms</button>
+<div id="rtdReverseOut" class="result">-</div>
+<p class="small">Uses common Callendar-Van Dusen RTD approximation for temperatures above 0 C.</p>
+</div>
+
+<div id="tc" class="tab card" style="display:none">
+<h2>Thermocouple Calculator</h2>
+<label>Thermocouple Type</label>
+<select id="tcType"><option value="K">Type K</option><option value="J">Type J</option><option value="T">Type T</option><option value="E">Type E</option><option value="N">Type N</option><option value="R">Type R</option><option value="S">Type S</option><option value="B">Type B</option></select>
+<label>Temperature to mV</label>
+<input id="tcTempInput" type="number" inputmode="decimal" value="212" placeholder="Temperature">
+<label>Input Unit</label>
+<select id="tcTempUnit"><option value="F">°F</option><option value="C">°C</option></select>
+<button onclick="calcTCmV()">Temperature → mV</button>
+<div id="tcMvOut" class="result">-</div>
+<label>mV to Temperature</label>
+<input id="tcMv" type="number" inputmode="decimal" value="4.1" placeholder="mV">
+<button onclick="calcTCTemp()">mV → Temperature</button>
+<div id="tcTempOut" class="result">-</div>
+<p class="small">Field approximation using average sensitivity values. Good for quick troubleshooting, not certified calibration.</p>
+</div>
+
+<div id="ma" class="tab card" style="display:none">
+<h2>4-20 mA Scaling</h2>
+<label>mA Signal</label><input id="maValue" type="number" inputmode="decimal" value="12">
+<label>Low Range</label><input id="low" type="number" inputmode="decimal" value="0">
+<label>High Range</label><input id="high" type="number" inputmode="decimal" value="100">
+<button onclick="calcMA()">mA → Engineering Units</button>
+<div id="maOut" class="result">-</div>
+<label>Engineering Unit Value</label><input id="euValue" type="number" inputmode="decimal" value="50">
+<button onclick="calcMAReverse()">Engineering Units → mA</button>
+<div id="maReverseOut" class="result">-</div>
+</div>
+
+<div id="cal" class="tab card" style="display:none">
+<h2>4-20 mA Calibrator</h2>
+<label>Low Range Value / LRV</label>
+<input id="calLow" type="number" inputmode="decimal" value="0">
+<label>Upper Range Value / URV</label>
+<input id="calHigh" type="number" inputmode="decimal" value="100">
+<label>Desired Percent</label>
+<input id="calPct" type="number" inputmode="decimal" value="50">
+<button onclick="calcCalPoint()">Percent → Expected mA and EU</button>
+<div id="calPctOut" class="result">-</div>
+
+<label>Actual mA Reading</label>
+<input id="calMa" type="number" inputmode="decimal" value="12">
+<button onclick="calcCalMa()">mA → Percent and EU</button>
+<div id="calMaOut" class="result">-</div>
+
+<label>Five Point Check</label>
+<button onclick="calcFivePoint()">Generate 0/25/50/75/100%</button>
+<div id="fivePointOut" class="result">-</div>
+</div>
+
+<div id="toolbox" class="tab card" style="display:none">
+<h2>Instrument Toolbox</h2>
+
+<label>Ohm's Law</label>
+<input id="tbVolts" type="number" inputmode="decimal" value="24" placeholder="Volts">
+<input id="tbOhms" type="number" inputmode="decimal" value="250" placeholder="Ohms">
+<button onclick="calcOhmsLaw()">Volts / Ohms → Current</button>
+<div id="ohmsLawOut" class="result">-</div>
+
+<label>4-20 mA across 250Ω Resistor</label>
+<input id="tbMa" type="number" inputmode="decimal" value="12" placeholder="mA">
+<button onclick="calcResistorVoltage()">mA through 250Ω → Volts</button>
+<div id="resistorOut" class="result">-</div>
+
+<label>1-5 V Signal Conversion</label>
+<input id="tbVoltsSignal" type="number" inputmode="decimal" value="3" placeholder="Volts">
+<button onclick="calcOneFive()">1-5 V → mA and Percent</button>
+<div id="oneFiveOut" class="result">-</div>
+
+<label>Loop Load Check</label>
+<input id="supplyV" type="number" inputmode="decimal" value="24" placeholder="Supply volts">
+<input id="minV" type="number" inputmode="decimal" value="12" placeholder="Transmitter minimum volts">
+<button onclick="calcLoopLoad()">Max Loop Resistance</button>
+<div id="loopLoadOut" class="result">-</div>
+</div>
+
+<div id="temp" class="tab card" style="display:none">
+<h2>Temperature Conversion</h2>
+<label>Value</label><input id="tempIn" type="number" inputmode="decimal" value="70">
+<label>From</label><select id="tempFrom"><option>F</option><option>C</option><option>K</option></select>
+<label>To</label><select id="tempTo"><option>C</option><option>F</option><option>K</option></select>
+<button onclick="calcTemp()">Calculate Temperature</button>
+<div id="tempOut" class="result">-</div>
+</div>
+
+<div id="pressure" class="tab card" style="display:none">
+<h2>Pressure Conversion</h2>
+<label>Value</label><input id="pressIn" type="number" inputmode="decimal" value="100">
+<label>From</label><select id="pressFrom"><option>PSI</option><option>bar</option><option>kPa</option><option>inH2O</option><option>inHg</option></select>
+<label>To</label><select id="pressTo"><option>bar</option><option>PSI</option><option>kPa</option><option>inH2O</option><option>inHg</option></select>
+<button onclick="calcPressure()">Calculate Pressure</button>
+<div id="pressOut" class="result">-</div>
+</div>
+
+<div id="flow" class="tab card" style="display:none">
+<h2>Flow Conversion</h2>
+<label>Value</label><input id="flowIn" type="number" inputmode="decimal" value="100">
+<label>From</label><select id="flowFrom"><option>GPM</option><option>LPM</option><option>M3HR</option><option>FT3HR</option><option>CFM</option></select>
+<label>To</label><select id="flowTo"><option>LPM</option><option>GPM</option><option>M3HR</option><option>FT3HR</option><option>CFM</option></select>
+<button onclick="calcFlow()">Calculate Flow</button>
+<div id="flowOut" class="result">-</div>
+<p class="small">M3HR = cubic meters per hour. FT3HR = cubic feet per hour.</p>
+</div>
+
+<div id="level" class="tab card" style="display:none">
+<h2>Level / Span Percent</h2>
+<label>Measured Value</label><input id="levelValue" type="number" inputmode="decimal" value="6.5">
+<label>Zero / Low</label><input id="levelLow" type="number" inputmode="decimal" value="0">
+<label>Span / High</label><input id="levelHigh" type="number" inputmode="decimal" value="10">
+<button onclick="calcLevel()">Calculate Percent</button>
+<div id="levelOut" class="result">-</div>
+</div>
+
+<div class="footer">Version 1.4 — Built for field instrumentation work.</div>
+</div>
+
+<script>
+function openTab(id,btn){var tabs=document.getElementsByClassName("tab");for(var i=0;i<tabs.length;i++){tabs[i].style.display="none";}document.getElementById(id).style.display="block";var buttons=document.getElementsByClassName("tabbtn");for(var j=0;j<buttons.length;j++){buttons[j].classList.remove("active");}btn.classList.add("active");}
+function num(id){return parseFloat(document.getElementById(id).value);}
+function val(id){return document.getElementById(id).value;}
+function show(id,text){document.getElementById(id).textContent=text;}
+function fmt(x){return (!isFinite(x)||isNaN(x)) ? "Check input" : (Math.round(x*10000)/10000).toString();}
+
+function calcRTD(){var R0=num("rtdType"),R=num("ohms"),A=0.0039083,B=-0.0000005775;var ratio=R/R0;var disc=A*A-4*B*(1-ratio);var C=(-A+Math.sqrt(disc))/(2*B);var F=C*9/5+32;show("rtdOut",fmt(C)+" C / "+fmt(F)+" F");}
+function calcRTDReverse(){var R0=num("rtdType"),C=num("rtdTemp"),A=0.0039083,B=-0.0000005775;var R=R0*(1+A*C+B*C*C);show("rtdReverseOut",fmt(R)+" ohms");}
+function tcSlope(type){if(type==="E")return 0.061;if(type==="J")return 0.055;if(type==="T")return 0.043;if(type==="K")return 0.041;if(type==="N")return 0.039;if(type==="R")return 0.010;if(type==="S")return 0.010;if(type==="B")return 0.006;return 0.041;}
+function calcTCmV(){var type=val("tcType"),input=num("tcTempInput"),unit=val("tcTempUnit");var C=unit==="F"?(input-32)*5/9:input;var F=C*9/5+32;var mv=C*tcSlope(type);show("tcMvOut","Input: "+fmt(input)+" °"+unit+"\\nEquivalent: "+fmt(C)+" °C / "+fmt(F)+" °F\\nType "+type+" Output: "+fmt(mv)+" mV");}
+function calcTCTemp(){var type=val("tcType"),mv=num("tcMv");var C=mv/tcSlope(type);var F=C*9/5+32;show("tcTempOut","Input: "+fmt(mv)+" mV\\nType "+type+" Approx Temp: "+fmt(C)+" °C / "+fmt(F)+" °F");}
+function calcMA(){var ma=num("maValue"),low=num("low"),high=num("high");var scaled=low+((ma-4)/16)*(high-low);var pct=((ma-4)/16)*100;show("maOut",fmt(scaled)+" units / "+fmt(pct)+"%");}
+function calcMAReverse(){var eu=num("euValue"),low=num("low"),high=num("high");var ma=4+((eu-low)/(high-low))*16;var pct=((eu-low)/(high-low))*100;show("maReverseOut",fmt(ma)+" mA / "+fmt(pct)+"%");}
+function calcCalPoint(){var low=num("calLow"),high=num("calHigh"),pct=num("calPct");var ma=4+(pct/100)*16;var eu=low+(pct/100)*(high-low);show("calPctOut",fmt(pct)+"%\\nExpected: "+fmt(ma)+" mA\\nEngineering Units: "+fmt(eu));}
+function calcCalMa(){var low=num("calLow"),high=num("calHigh"),ma=num("calMa");var pct=((ma-4)/16)*100;var eu=low+(pct/100)*(high-low);show("calMaOut",fmt(ma)+" mA\\nPercent: "+fmt(pct)+"%\\nEngineering Units: "+fmt(eu));}
+function calcFivePoint(){var low=num("calLow"),high=num("calHigh");var p=[0,25,50,75,100];var text="";for(var i=0;i<p.length;i++){var ma=4+(p[i]/100)*16;var eu=low+(p[i]/100)*(high-low);text+=p[i]+"% = "+fmt(ma)+" mA = "+fmt(eu)+" EU";if(i<p.length-1)text+="\\n";}show("fivePointOut",text);}
+function calcOhmsLaw(){var V=num("tbVolts"),R=num("tbOhms");var A=V/R;show("ohmsLawOut",fmt(A)+" A\\n"+fmt(A*1000)+" mA");}
+function calcResistorVoltage(){var ma=num("tbMa");var V=(ma/1000)*250;show("resistorOut",fmt(ma)+" mA across 250Ω = "+fmt(V)+" V");}
+function calcOneFive(){var V=num("tbVoltsSignal");var pct=((V-1)/4)*100;var ma=4+(pct/100)*16;show("oneFiveOut",fmt(V)+" V\\nPercent: "+fmt(pct)+"%\\nmA Equivalent: "+fmt(ma)+" mA");}
+function calcLoopLoad(){var supply=num("supplyV"),minv=num("minV");var maxR=(supply-minv)/0.02;show("loopLoadOut","Max loop resistance at 20 mA:\\n"+fmt(maxR)+" ohms");}
+function calcTemp(){var x=num("tempIn"),from=val("tempFrom"),to=val("tempTo");var C=from==="C"?x:from==="F"?(x-32)*5/9:x-273.15;var out=to==="C"?C:to==="F"?C*9/5+32:C+273.15;show("tempOut",fmt(out)+" "+to);}
+function calcPressure(){var f={"PSI":1,"bar":0.0689476,"kPa":6.89476,"inH2O":27.7076,"inHg":2.03602};var x=num("pressIn"),from=val("pressFrom"),to=val("pressTo");show("pressOut",fmt((x/f[from])*f[to])+" "+to);}
+function calcFlow(){var f={"GPM":1,"LPM":3.785411784,"M3HR":0.227124707,"FT3HR":8.02083333,"CFM":0.133680556};var x=num("flowIn"),from=val("flowFrom"),to=val("flowTo");show("flowOut",fmt((x/f[from])*f[to])+" "+to);}
+function calcLevel(){var x=num("levelValue"),low=num("levelLow"),high=num("levelHigh");var pct=((x-low)/(high-low))*100;show("levelOut",fmt(pct)+"%");}
+calcRTD();calcRTDReverse();calcTCmV();calcTCTemp();calcMA();calcMAReverse();calcCalPoint();calcCalMa();calcFivePoint();calcOhmsLaw();calcResistorVoltage();calcOneFive();calcLoopLoad();calcTemp();calcPressure();calcFlow();calcLevel();
+</script>
+</body>
+</html>
