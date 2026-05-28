@@ -302,5 +302,10 @@ function valveReport(){
 
 window.onload=function(){updateValveTable();buildSheet();renderSaved();calcRTDTemp();calcRTDOhms();calcTCmV();calcTCTemp();maToEU();euToMa();calc250();loopLoad();}
 </script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js");
+}
+</script> 
 </body>
 </html>
