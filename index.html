@@ -27,34 +27,6 @@ th{background:#0f172a}
 .footer{text-align:center;color:#9ca3af;padding:18px}
 .small{font-size:13px;color:#cbd5e1}
 
-@media print {
-  body * {
-    visibility: hidden;
-  }
-
-  #printable-report,
-  #printable-report * {
-    visibility: visible;
-  }
-
-  #printable-report {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    background: white;
-    color: black;
-    padding: 20px;
-  }
-
-  button,
-  input,
-  textarea,
-  select,
-  .no-print {
-    display: none !important;
-  }
-}
 
 #splash{
  position:fixed;
@@ -192,7 +164,7 @@ th{background:#0f172a}
 </style>
 </head>
 <body>
-    
+
 <div id="splash">
   <div class="splashBox">
     <img src="icon-512.PNG" class="splashLogo" alt="YIT Logo">
@@ -227,16 +199,8 @@ th{background:#0f172a}
 <button class="tile" onclick="showPage('library')">📚 TC Reference</button>
 <button class="tile" onclick="showPage('quick')">📋 Quick Tables</button>
 </div>
-</div>   
-           
-<div id="report" class="page">
-<div class="card">
- <button class="btn blue" onclick="home()">← Home</button>
-<h2>Calibration Report</h2>
-<textarea id="notes" placeholder="Calibration notes / problems found"></textarea>
-        <button class="btn" onclick="generateReport()">Generate Report</button>
- <div id="printable-report"> <!-- Where professional only gets printable safely -->
-  <button class="btn blue" onclick="generatePrintableReport();">Print / Save PDF </button>
-  <br>
 </div>
-</div>
+
+<div id="rtd" class="page"></div>
+<div class="footer">Version 2.2.1-fixed • Professional printable reports • Offline installable app</div>
+</body></html>
