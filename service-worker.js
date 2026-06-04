@@ -1,4 +1,4 @@
-const CACHE_NAME = "yit-cache-v1";
+const CACHE_NAME = "yit-cache-v3-0-10";
 
 const urlsToCache = [
   "./",
